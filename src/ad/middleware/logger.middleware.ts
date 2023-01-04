@@ -1,43 +1,42 @@
-import { Request, Response, NextFunction } from "express";
-import { Injectable, NestMiddleware, Logger } from "@nestjs/common";
-import { LoggerService } from "@app/logger/logger.service";
-
+import { Request, Response, NextFunction } from 'express';
+import { Injectable, NestMiddleware } from '@nestjs/common';
+import { LoggerService } from '@app/logger/logger.service';
 
 @Injectable()
 export class LoggerMiddleware implements NestMiddleware {
   private requestErrorMessage = null;
   private readonly requestStart = Date.now();
 
-  constructor(
-    private readonly log: LoggerService
-  ){}
+  constructor(private readonly log: LoggerService) {}
 
   use(request: Request, response: Response, next: NextFunction): void {
-
-    request.on("error", (error) => {
-        this.getError(error);
+    request.on('error', (error) => {
+      this.getError(error);
     });
-    response.on("error", (error) => {
-        this.getError(error);
+    response.on('error', (error) => {
+      this.getError(error);
     });
-    response.on("finish", () => {
-        this.logMiddleware(request, response, this.requestErrorMessage);
+    response.on('finish', () => {
+      this.logMiddleware(request, response, this.requestErrorMessage);
     });
 
     next();
   }
 
-  private getError(error: any){
+  private getError(error: any) {
     this.requestErrorMessage = error.message;
   }
 
-
-
-  private logMiddleware(request: Request, response: Response, errorMessage: string){
+  private logMiddleware(
+    request: Request,
+    response: Response,
+    errorMessage: string,
+  ) {
     const { rawHeaders, httpVersion, method, socket, url } = request;
-    const { remoteAddress, remoteFamily } = socket;  
+    const { remoteAddress, remoteFamily } = socket;
     const { statusCode, statusMessage } = response;
-    this.log.info(JSON.stringify({
+    this.log.info(
+      JSON.stringify({
         timestamp: Date.now(),
         processingTime: Date.now() - this.requestStart,
         body: request.body,
@@ -50,8 +49,8 @@ export class LoggerMiddleware implements NestMiddleware {
         response: {
           statusCode,
           statusMessage,
-        }
-      }))
+        },
+      }),
+    );
   }
-
 }
