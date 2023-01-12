@@ -81,7 +81,7 @@ export class AdService {
             }
             exec(
               `Get-ADGroupmember ${AD_GROUP}`,
-              { shell: 'powershell', encoding: 'utf8' },
+              { shell: 'powershell', encoding: 'binary' },
               (error: ExecException | null, stdout: string) => {
                 if (error) {
                   this.log.error(String(error));
