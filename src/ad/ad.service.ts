@@ -10,7 +10,7 @@ import {
 } from './ad.consts';
 import { ADDto } from './dto/ad.gto';
 import { AdActionTypes } from './types/enum';
-import { execSync, exec, ExecException } from 'child_process';
+import { exec, ExecException } from 'child_process';
 import { UtilsService } from '@app/utils/utils.service';
 
 @Injectable()
@@ -37,31 +37,35 @@ export class AdService {
   private async addADUserToGroup(user: string) {
     return new Promise((resolve, reject) => {
       try {
-        execSync(`Add-ADGroupMember "${AD_GROUP}" ${user}`, {
-          shell: 'powershell',
-        }).toString();
-        resolve({});
+        exec(
+          `Add-ADGroupMember "${AD_GROUP}" "${user}"`,
+          { shell: 'powershell', encoding: 'utf8' },
+          (error: ExecException | null, stdout: string) => {
+            if (error !== null)
+              reject(`${AD_ADD_ERROR} для пользователя ${user}`);
+            resolve({});
+          },
+        );
       } catch (e) {
-        reject({
-          message: AD_ADD_ERROR,
-        });
+        this.log.error(e);
+        reject(`${AD_ADD_ERROR} для пользователя ${e}`);
       }
     });
   }
   private async deleteADUserToGroup(user: string) {
     return new Promise((resolve, reject) => {
       try {
-        execSync(
+        exec(
           `Remove-ADGroupMember -Confirm:$false -Identity "${AD_GROUP}" -Member ${user}`,
-          {
-            shell: 'powershell',
+          { shell: 'powershell', encoding: 'utf8' },
+          (error: ExecException | null, stdout: string) => {
+            if (error !== null)
+              reject(`${AD_DELETE_ERROR} для пользователя ${user}`);
+            resolve({});
           },
-        ).toString();
-        resolve({});
+        );
       } catch (e) {
-        reject({
-          message: AD_DELETE_ERROR,
-        });
+        reject(`${AD_DELETE_ERROR} ${e}`);
       }
     });
   }
@@ -104,10 +108,7 @@ export class AdService {
           },
         );
       } catch (e) {
-        this.log.error(e);
-        reject({
-          message: AD_GET_USERS_ERROR,
-        });
+        reject(`${AD_GET_USERS_ERROR} ${e}`);
       }
     });
   }
