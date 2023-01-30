@@ -26,9 +26,7 @@ export class AdController {
       await this.adService.updateADUser(body);
       return res.status(HttpStatus.OK).json({ result: true });
     } catch (e) {
-      return res
-        .status(HttpStatus.FORBIDDEN)
-        .json({ result: false, error: e.message });
+      return res.status(HttpStatus.FORBIDDEN).json({ result: false, error: e });
     }
   }
 
@@ -38,9 +36,7 @@ export class AdController {
       const adUsers = await this.adService.getAdUsers();
       return res.status(HttpStatus.OK).json({ result: true, data: adUsers });
     } catch (e) {
-      return res
-        .status(HttpStatus.FORBIDDEN)
-        .json({ result: false, error: e.message });
+      return res.status(HttpStatus.FORBIDDEN).json({ result: false, error: e });
     }
   }
 }
